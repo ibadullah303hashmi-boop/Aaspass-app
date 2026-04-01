@@ -1,26 +1,3 @@
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCbvG5-X0WIOBD_WZV8X0i7Fl0moPpOvhM",
-    authDomain: "aaspass-driving-school-bc8c1.firebaseapp.com",
-    projectId: "aaspass-driving-school-bc8c1",
-    storageBucket: "aaspass-driving-school-bc8c1.firebasestorage.app",
-    messagingSenderId: "303958716118",
-    appId: "1:303958716118:web:e41db2ef5409f049d52377",
-    measurementId: "G-0RE7KNSWQ7"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,6 +13,21 @@
         :root{var(--gold):#FF9800;--yellow:#FFB800;--blue:#0085FF;--white:#FFF;--dark:#1A1A1A;--success:#22c55e;--fail:#ef4444}
         *{ -webkit-tap-highlight-color:transparent!important;outline:0!important;box-sizing:border-box}
         html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:'Montserrat',sans-serif;user-select:none;touch-action:manipulation}
+        
+        /* Loading Screen Styles */
+        #app-preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 20000; transition: opacity 0.8s ease;
+        }
+        .loader-logo { width: 100px; height: 100px; margin-bottom: 20px; border-radius: 20px; animation: pulse 1.5s infinite; }
+        .loader-bar-bg { width: 200px; height: 6px; background: rgba(255,255,255,0.3); border-radius: 10px; overflow: hidden; }
+        #loader-fill { width: 0%; height: 100%; background: #fff; transition: width 0.3s; }
+        .loader-pct { color: white; font-weight: 900; margin-top: 10px; font-size: 14px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .loader-hidden { opacity: 0; pointer-events: none; }
+
         #dashboard-page{width:100%;height:100%;display:flex;flex-direction:column;max-width:500px;margin:0 auto;background:#fff;position:relative}
         .slider-box{width:100%;height:25%;overflow:hidden;position:relative;background:#000}
         .slider-wrapper{display:flex;width:300%;height:100%;transition:transform .6s ease-in-out}
@@ -169,6 +161,12 @@
 </head>
 <body x-data="mainSystem()" x-init="initApp()">
 
+<div id="app-preloader">
+    <img src="1000372168.png" class="loader-logo">
+    <div class="loader-bar-bg"><div id="loader-fill"></div></div>
+    <div class="loader-pct" id="loader-pct-text">Aaspass Loading 0%</div>
+</div>
+
 <div id="login-overlay">
     <div class="login-card">
         <h2 class="text-3xl font-black mb-6">WELCOME 👋</h2>
@@ -300,6 +298,48 @@
 <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/3003/3003-preview.mp3"></audio>
 
 <script>
+    // MEDIA PRELOADING SYSTEM
+    const filesToPreload = [
+        '1000372168.png', '1_seat.gif', '2_clutch.gif', '3_neutral.gif', '4_1st-gair.gif', 
+        '1_tires.gif', '2_h-brake.gif', '3_sideglass.gif', '4_Indicator.gif', 'Switch.png', 
+        'key.png', 'dashboard.jpg', 'starting.jpg', 'moving.jpg', 'steering.jpg', 'stopping.jpg',
+        'p.formula.jpg', 'b.control.jpg', 'r.turn.jpg', '2nd.gair.jpg', 'gair.formula.jpg', 
+        'f.cutting.jpg', '3rd.gair.jpg', 'gair.motion.jpg', '4th.gair.jpg', 'overtake.jpg', 
+        'uphill.jpg', 'l.test.jpg', 'r.signs.jpg', 't.rules.jpg', 'certificate.jpg',
+        'q1.m4a', 'q2.m4a', 'q3.m4a', 'q4.m4a', 'q5.m4a'
+    ];
+
+    let loadedCount = 0;
+    function preloadAll() {
+        filesToPreload.forEach(file => {
+            let asset;
+            const ext = file.split('.').pop().toLowerCase();
+            if(['m4a','mp3'].includes(ext)) {
+                asset = new Audio();
+                asset.addEventListener('canplaythrough', itemLoaded, {once:true});
+            } else {
+                asset = new Image();
+                asset.onload = itemLoaded;
+            }
+            asset.onerror = itemLoaded; // Skip on error to prevent stuck loader
+            asset.src = file;
+        });
+    }
+
+    function itemLoaded() {
+        loadedCount++;
+        const pct = Math.floor((loadedCount / filesToPreload.length) * 100);
+        document.getElementById('loader-fill').style.width = pct + '%';
+        document.getElementById('loader-pct-text').innerText = `Aaspass Loading ${pct}%`;
+        
+        if(loadedCount >= filesToPreload.length) {
+            setTimeout(() => {
+                document.getElementById('app-preloader').classList.add('loader-hidden');
+            }, 800);
+        }
+    }
+    window.addEventListener('load', preloadAll);
+
     function handleLogin() {
         const name = document.getElementById('user-name').value;
         const phone = document.getElementById('user-phone').value;
