@@ -1,0 +1,718 @@
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbvG5-X0WIOBD_WZV8X0i7Fl0moPpOvhM",
+    authDomain: "aaspass-driving-school-bc8c1.firebaseapp.com",
+    projectId: "aaspass-driving-school-bc8c1",
+    storageBucket: "aaspass-driving-school-bc8c1.firebasestorage.app",
+    messagingSenderId: "303958716118",
+    appId: "1:303958716118:web:e41db2ef5409f049d52377",
+    measurementId: "G-0RE7KNSWQ7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aaspass Driving Club - Pro Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Nunito:wght@900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root{var(--gold):#FF9800;--yellow:#FFB800;--blue:#0085FF;--white:#FFF;--dark:#1A1A1A;--success:#22c55e;--fail:#ef4444}
+        *{ -webkit-tap-highlight-color:transparent!important;outline:0!important;box-sizing:border-box}
+        html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:'Montserrat',sans-serif;user-select:none;touch-action:manipulation}
+        #dashboard-page{width:100%;height:100%;display:flex;flex-direction:column;max-width:500px;margin:0 auto;background:#fff;position:relative}
+        .slider-box{width:100%;height:25%;overflow:hidden;position:relative;background:#000}
+        .slider-wrapper{display:flex;width:300%;height:100%;transition:transform .6s ease-in-out}
+        .slider-wrapper img{width:33.333%;height:100%;object-fit:fill}
+        .dashboard-content{width:100%;height:75%;position:relative}
+        .dashboard-content img{width:100%;height:100%;object-fit:fill;display:block}
+        .tap-to-start-overlay{position:absolute;top:4%;left:5%;width:90%;height:10%;cursor:pointer;z-index:1000}
+        .team-links{position:absolute;top:38%;left:0;width:100%;height:30%;display:flex;justify-content:space-around;z-index:1001}
+        .team-links a{width:31%;height:100%;cursor:pointer;display:block}
+        .social-links-container{position:absolute;bottom:8%;left:42%;width:55%;height:8%;display:flex;justify-content:space-around}
+        .social-links-container a{width:18%;height:100%;display:block}
+        #levels-page{display:none;width:100%;height:100%;position:relative;background:#ededed}
+        .header{width:100%;height:210px;background:#000;border-bottom:3px solid var(--gold);display:flex;align-items:center;justify-content:center;position:relative;z-index:200;cursor:pointer}
+        #vPlayer{width:100%;height:100%;display:none;object-fit:contain}
+        .v-msg{color:#fff;font-size:13px;font-weight:700;opacity:.5;text-align:center}
+        .puzzle-buttons{display:flex;justify-content:space-around;padding:20px 0 10px;z-index:250;position:relative}
+        .btn-puz{padding:10px 25px;border-radius:8px;font-weight:700;border:0;font-size:16px;box-shadow:0 4px 6px rgba(0,0,0,.1);cursor:pointer}
+        .p1{background:#28a745;color:#fff}.p2{background:#a0a0a0;color:#fff}.btn-test{background:#0085FF;color:#fff;padding:10px 25px;border-radius:8px;font-weight:700;border:0;font-size:16px;box-shadow:0 4px 6px rgba(0,0,0,.1);cursor:pointer}
+        .btn-puz-passed{opacity:.5;pointer-events:none;transform:scale(.95)}.btn-puz-blue{background:#0085FF!important}
+        .progress-container{width:85%;margin:0 auto 5px;z-index:250;position:relative}
+        .progress-label{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#444;margin-bottom:4px}
+        .progress-bg{width:100%;height:12px;background:#d0d0d0;border-radius:10px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.2)}
+        .progress-fill{height:100%;width:0;background:linear-gradient(90deg,#FF9800,#ffb74d);border-radius:10px;transition:width 1s ease-in-out}
+        .driver-rank-container { width: 85%; margin: 10px auto; text-align: center; z-index: 250; position: relative; }
+        .level-title-display { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 24px; color: #1a1a1a; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 0px #FF9800; }
+        .stage{position:absolute;bottom:-20px;left:0;width:100%;height:calc(100dvh - 340px);background:#ededed;perspective:1200px;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+        .selection-box{position:absolute;width:92%;height:70px;top:50%;left:4%;transform:translateY(-50%);border:3.5px solid var(--gold);border-radius:18px;z-index:100;pointer-events:none;background:rgba(0,0,0,.03)}
+        .scroll-layer{position:absolute;width:100%;height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;z-index:150;scrollbar-width:none}
+        .scroll-layer::-webkit-scrollbar{display:none}.pad{height:calc(50% - 35px)}.snap{height:70px;scroll-snap-align:center;cursor:pointer}
+        .cylinder{position:absolute;width:100%;height:70px;top:50%;margin-top:-35px;display:flex;justify-content:center;align-items:center;transform-style:preserve-3d;pointer-events:none}
+        .card{position:absolute;width:88%;max-width:420px;height:62px;display:flex;align-items:center;padding:0 15px;border-radius:12px;color:#fff;backface-visibility:hidden;left:50%;transform-origin:center center}
+        .L1{background:linear-gradient(135deg,#425f44,#6e8e71);border-left:5px solid #a5d6a7}.L2{background:linear-gradient(135deg,#4a5a73,#6d7d96);border-left:5px solid #90caf9}
+        .L3{background:linear-gradient(135deg,#6b4c7d,#8d709e);border-left:5px solid #e1bee7}.L4{background:linear-gradient(135deg,#8c6a45,#ab8d6b);border-left:5px solid #ffe0b2}
+        .L5{background:linear-gradient(135deg,#8c4562,#ab6b83);border-left:5px solid #f8bbd0}.L6{background:linear-gradient(135deg,#45828c,#6b9bab);border-left:5px solid #b2ebf2}
+        .L7{background:linear-gradient(135deg,#515a5e,#788185);border-left:5px solid #cfd8dc}
+        .card img{width:38px;height:38px;margin-right:12px;border-radius:8px;background:#fff;padding:2px;object-fit:contain}
+        .card h4{font-size:17px;flex:1;font-weight:900;margin:0;letter-spacing:0.5px;text-shadow:1px 1px 2px rgba(0,0,0,0.3);font-family:'Montserrat',sans-serif}
+        .card h4 span{font-weight:700;opacity:0.9}
+        .is-locked{opacity:.7;filter:grayscale(.5)}.lock-icon{font-size:18px;opacity:.8}
+        .is-passed{background: #22c55e !important; border-left: 5px solid #fff !important;}
+        .btn-back{position:absolute;top:10px;right:10px;background:var(--gold);border:0;color:#fff;width:32px;height:32px;border-radius:50%;font-size:14px;font-weight:900;z-index:300;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        #quiz-test-container { display: none; position: fixed; inset: 0; z-index: 3000; background: #f0f2f5; overflow-y: auto; direction: rtl; font-family: sans-serif; }
+        .header-status { position: sticky; top: 0; width: 100%; background: #fff; padding: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .progress-container-q { height: 8px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 8px; }
+        #progress-bar-q { height: 100%; width: 0%; background: linear-gradient(90deg, #ffa500, #ff8c00); transition: width 0.4s ease; }
+        .option-btn-q { width: 100%; padding: 15px; border: 2px solid #f2f2f7; border-radius: 12px; background: #fff; cursor: pointer; font-size: 1.1rem; text-align: right; margin-bottom: 10px; font-weight: 700; display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; }
+        .q-img-container { width: 100%; display: flex; justify-content: center; margin-bottom: 15px; }
+        .q-img { width: 90%; max-height: 200px; object-fit: contain; border-radius: 12px; border: 3px solid #eee; }
+        .option-btn-q.correct { border-color: #00c853 !important; background-color: #e8f5e9 !important; color: #00c853; }
+        .option-btn-q.wrong { border-color: #ff1744 !important; background-color: #ffebee !important; color: #ff1744; }
+        .blink-active { animation: focus-glow 1s ease-in-out infinite alternate; color: #d35400 !important; background: rgba(255, 165, 0, 0.1); border-radius: 8px; }
+        @keyframes focus-glow { from { box-shadow: 0 0 5px rgba(255, 165, 0, 0.2); } to { box-shadow: 0 0 15px rgba(255, 165, 0, 0.5); } }
+        #result-card-q { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 30px 70px rgba(0,0,0,0.4); text-align: center; z-index: 4000; }
+        .btn-action { background: #0085FF; color: white; padding: 15px; border-radius: 15px; font-weight: 900; }
+        .blink-puz2 { animation: puz-blink 0.8s infinite alternate; background: #0085FF !important; color: white !important; }
+        @keyframes puz-blink { from { opacity: 1; transform: scale(1); } to { opacity: 0.7; transform: scale(1.05); } }
+        #puzzle-container{display:none;position:fixed;inset:0;z-index:2000;background:#FFB300;min-height:100vh;touch-action:none;overflow:hidden}
+        [x-cloak]{display:none!important}.app-container-1{max-width:412px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative}
+        .btn-puzzle-back{position:fixed;bottom:15px;left:15px;z-index:5000;background:rgba(0,0,0,.6);color:#fff;padding:5px 12px;border-radius:15px;font-size:10px;font-weight:900;border:1.5px solid rgba(255,255,255,.4);cursor:pointer;text-transform:uppercase}
+        .header-banner{background:#fff;margin:20px 10px;padding:12px;border-radius:10px;text-align:center;font-weight:700;color:#1a1a1a;font-size:1rem}
+        .highlight-text{background:linear-gradient(to bottom,transparent 60%,#FFF176 40%)}
+        .header-wrapper{background:#A6A6A6;margin:15px 12px;padding:6px 8px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;border:2px solid #8c8c8c}
+        .num-red{color:#b22222;font-weight:900;font-size:1.4rem;line-height:1}
+        .step-txt{color:#000;font-weight:700;font-size:1.1rem}
+        .arrow-box{background:#5E6D79;color:#fff;padding:2px 6px;border-radius:4px;font-size:.8rem;font-weight:700}
+        .starting-text{background:#61FF61;color:#000;padding:2px 12px;border-radius:15px;font-weight:800;font-size:1.1rem;border:1px solid #4ade80}
+        .starting-text-dark{background:#228b22;color:#000;padding:2px 12px;border-radius:15px;font-weight:800;font-size:1.1rem;border:1px solid #1a6b1a}
+        .right-section{background:#fff;border-radius:10px;display:flex;align-items:center;padding:4px 8px;gap:8px;border:1px solid #ccc}
+        .grid-layout{display:flex;justify-content:center;gap:6px;padding:0 10px;margin-top:10px;min-height:90px}
+        .target-box{width:85px;height:85px;border:3px solid #fff;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}
+        .blink-target{animation:blink-border .8s infinite alternate;border-width:4px}
+        @keyframes blink-border{from{border-color:#fff;transform:scale(1)}to{border-color:#FFF176;transform:scale(1.05)}}
+        .curve-footer{margin-top:auto;background:#fff;height:75%;border-top-left-radius:45px;border-top-right-radius:45px;padding:25px 15px;display:flex;flex-direction:column;align-items:center}
+        .draggable-item{width:160px;height:160px;background:#fff;border-radius:22px;box-shadow:0 8px 15px rgba(0,0,0,.08);touch-action:none;position:relative;z-index:50;overflow:hidden}
+        .dragging{position:fixed!important;z-index:9999!important;pointer-events:none;opacity:.9;transform:scale(1.1);box-shadow:0 15px 30px rgba(0,0,0,.3)}
+        .switch-target{width:260px;height:260px;border:5px dashed rgba(255,255,255,.8);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);position:relative}
+        .engine-vibrate{animation:shakeV .1s infinite}
+        @keyframes shakeV{0%,100%{transform:translate(1px,1px)}50%{transform:translate(-1px,-2px)}}
+        #unlocker{position:fixed;inset:0;background:#FFB300;z-index:10000;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .header-patti{background:#FFF;margin:10px;padding:8px 5px;border-radius:15px;display:flex;align-items:center;justify-content:space-around;box-shadow:0 4px 10px rgba(0,0,0,.1)}
+        .red-4{color:#E31E24;font-size:2rem;font-family:'Nunito',sans-serif;font-weight:900;line-height:1}
+        .steps-txt{color:#000;font-size:1.2rem;font-weight:800}.arrow-sq{color:#B0C4DE;font-size:1.1rem;font-weight:700}
+        .start-pill{background:#0F0;color:#000;padding:4px 12px;border-radius:50px;font-weight:800;font-size:1.1rem;border:3px solid #000}
+        .mission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 10px}
+        .drop-box{aspect-ratio:1/1;border:2.5px solid rgba(255,255,255,.5);border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);position:relative}
+        .box-digit{color:rgba(255,255,255,.2);font-family:'Nunito',sans-serif;font-size:2.8rem;font-weight:900}
+        .ignition-section{background:#FDE68A;margin:8px 10px;padding:10px;border-radius:18px;height:95px;display:flex;align-items:center;border:3px solid #F59E0B;position:relative}
+        .switch-lock{width:85px;height:85px;background:url('Switch.png') no-repeat center;background-size:contain;position:relative;display:flex;align-items:center;justify-content:center}
+        .key-on-switch{position:absolute;transform:rotate(90deg);width:65px;z-index:10}.key-start-pos{position:absolute;right:20px;width:80px;height:80px;z-index:100;touch-action:none}
+        .items-pool{background:#FFF;border-radius:40px 40px 0 0;flex-grow:1;position:relative;margin-top:10px;padding:10px 15px;touch-action:none;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;overflow:hidden;height:240px}
+        .drag-item{width:90px;height:90px;position:static;border:0;border-radius:10px;box-shadow:0 6px 15px rgba(0,0,0,.15);touch-action:none;transition: transform 0.1s ease-out;flex-shrink:0}
+        .placed-gif{width:100%;height:100%;object-fit:cover;border-radius:9px;opacity:.8}
+        .status-mark-svg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;z-index:50;pointer-events:none}
+        .congrats-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;text-align:center;padding:20px}
+        .congrats-card{background:#fff;padding:30px;border-radius:30px;border:5px solid #0F0;box-shadow:0 0 30px #0F0;max-width:90%}
+        .error-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:50px;z-index:60;pointer-events:none}
+        .footer-controls{background:#FFF;padding:15px 20px 45px;display:flex;justify-content:space-around;align-items:center;border-top:1.5px solid #eee}
+        .restart-btn{background:#FF4B4B;color:#fff;padding:10px 25px;border-radius:50px;font-weight:900;font-size:1.2rem;box-shadow:0 5px 0 #991B1B;border:0}
+        #puzzle-2-container{display:none;position:fixed;inset:0;z-index:2000;background:#000}
+        #lesson-section-2{background:#FFB300;min-height:100vh;display:block;overflow-y:auto}
+        .drop-box-2{aspect-ratio:1/1;border:3px solid rgba(255,255,255,.4);border-radius:12px;background:rgba(0,0,0,.1);position:relative;transition:.3s}
+        .drop-box-2.success-border{border-color:#22c55e;box-shadow:0 0 15px #22c55e}
+        .status-mark-2{position:absolute;top:-6px;right:-6px;color:#fff;border-radius:50%;width:24px;height:24px;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;z-index:20}
+        .mark-pass-2{background:#22c55e}.mark-fail-2{background:#ef4444}
+        .interior-map-2{position:relative;width:100%;background:#000}
+        .hotspot-2{position:absolute;border-radius:50%;background:rgba(255,255,255,.01);cursor:pointer;z-index:50;transform:translate(-50%,-50%)}
+        .win-overlay-2{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+        .guide-hand{position:fixed;pointer-events:none;z-index:10000;font-size:40px;transition:all 1.2s cubic-bezier(0.4, 0, 0.2, 1);filter:drop-shadow(0 0 10px gold)}
+        
+        #login-overlay { position: fixed; inset: 0; background: #FFB300; z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: white; padding: 30px; border-radius: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center; }
+        .login-input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 15px; margin-bottom: 15px; font-weight: 700; outline: none; }
+        .login-input:focus { border-color: #FFB300; }
+        .btn-login { background: #1a1a1a; color: white; width: 100%; padding: 15px; border-radius: 15px; font-weight: 900; font-size: 1.1rem; }
+
+        /* Admin Mode Specific CSS */
+        #admin-panel { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; padding:20px; color:white; overflow-y:auto; font-family:sans-serif; }
+        .admin-btn { width:100%; padding:15px; margin-bottom:10px; border-radius:10px; font-weight:bold; color:white; text-align:center; }
+        .admin-btn-blue { background:#0085FF; }
+        .admin-btn-red { background:#ef4444; }
+        .admin-btn-green { background:#22c55e; }
+
+        /* Final Certificate Modal - Exact Pixel Alignment */
+        #certificate-modal { display:none; position:fixed; inset:0; background:#f0f0f0; z-index:11000; overflow-y:auto; }
+        .cert-viewport { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px 0; }
+        .cert-container { position:relative; width:1000px; height:667px; background:url('certificate.jpg'); background-size:cover; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: scale(0.35); transform-origin: top center; margin-bottom: -400px; }
+        @media (min-width: 500px) { .cert-container { transform: scale(0.45); margin-bottom: -350px; } }
+        .cert-name { position:absolute; top:260px; left:0; width:100%; text-align:center; font-family: 'Nunito', sans-serif; font-weight:900; font-size:48px; color:#1a2e5a; text-transform: uppercase; }
+        .cert-id { position:absolute; top:480px; left:280px; width:120px; height:45px; display:flex; align-items:center; justify-content:center; font-weight:950; font-size:24px; color:#fff; font-family:sans-serif; }
+    </style>
+</head>
+<body x-data="mainSystem()" x-init="initApp()">
+
+<div id="login-overlay">
+    <div class="login-card">
+        <h2 class="text-3xl font-black mb-6">WELCOME 👋</h2>
+        <input type="text" id="user-name" class="login-input" placeholder="Enter Full Name">
+        <input type="tel" id="user-phone" class="login-input" placeholder="Phone (e.g 0300...)">
+        <button class="btn-login" onclick="handleLogin()">LOGIN & START</button>
+        <p class="text-xs text-gray-400 mt-4">Required for your Digital Certificate</p>
+    </div>
+</div>
+
+<div id="dashboard-page">
+    <div class="slider-box" onclick="handleAdminClick()"><div class="slider-wrapper" id="bannerSlider"><img src="baner1.png"><img src="baner2.png"><img src="baner3.png"></div></div>
+    <div class="dashboard-content"><img src="dashboard.jpg"><div class="tap-to-start-overlay" onclick="showLevels()"></div>
+        <div class="team-links"><a href="https://wa.me/923088128361" target="_blank"></a><a href="https://wa.me/923275588692" target="_blank"></a><a href="https://wa.me/923259979919" target="_blank"></a></div>
+        <div class="social-links-container"><a href="https://www.facebook.com/share/v/14dkSWFwMQh/" target="_blank"></a><a href="https://wa.me/923400403336" target="_blank"></a><a href="https://www.tiktok.com/@aaspassdc?_r=1&_t=ZS-94PAUQDF21g" target="_blank"></a><a href="https://youtube.com/@aaspassdrivingschool2375?si=mY7zpzWv2zNSJUyO" target="_blank"></a><a href="https://www.instagram.com/aaspassdriving?igsh=amVocWxmb2d5ZHVk" target="_blank"></a></div>
+    </div>
+</div>
+
+<div id="admin-panel">
+    <h1 class="text-2xl font-black mb-6 text-center border-b pb-2">ADMIN TESTING MODE</h1>
+    <div class="mb-6">
+        <input type="password" id="admin-pass" class="login-input text-black" placeholder="Enter Password">
+        <button class="admin-btn admin-btn-blue" onclick="verifyAdminPass()">Unlock Panel</button>
+    </div>
+    <div id="admin-controls" style="display:none">
+        <button class="admin-btn admin-btn-green" onclick="unlockAllLevelsAdmin()">🔓 Unlock All Levels</button>
+        <button class="admin-btn admin-btn-blue" onclick="jumpToLastLevelAdmin()">🏁 Jump to Last Level</button>
+        <button class="admin-btn admin-btn-blue" onclick="showCertificateAdmin()">📜 Show Certificate</button>
+        <button class="admin-btn admin-btn-red" onclick="resetProgressAdmin()">🔄 Reset Progress</button>
+    </div>
+    <button class="admin-btn bg-gray-600 mt-10" onclick="closeAdminPanel()">✕ Close Admin</button>
+    <div class="mt-4 p-4 bg-gray-800 rounded text-xs">
+        <p><strong>User:</strong> <span id="admin-user-info"></span></p>
+    </div>
+</div>
+
+<div id="certificate-modal">
+    <div class="cert-viewport">
+        <div id="cert-to-capture" class="cert-container">
+            <div id="cert-user-name" class="cert-name"></div>
+            <div id="cert-user-id" class="cert-id"></div>
+        </div>
+        <div class="flex flex-col gap-3 w-full px-10 mt-6">
+            <button onclick="downloadCert()" class="bg-green-600 text-white w-full py-4 rounded-xl font-black text-xl shadow-lg">DOWNLOAD ⬇</button>
+            <button onclick="document.getElementById('certificate-modal').style.display='none'" class="bg-gray-800 text-white w-full py-4 rounded-xl font-black text-xl shadow-lg">CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<div id="levels-page">
+    <button class="btn-back" onclick="hideLevels()">✕</button>
+    <div class="header" onclick="playSelectedVideo()"><video id="vPlayer" onclick="this.paused?this.play():this.pause()" controls controlsList="nodownload" oncontextmenu="return false;"></video><div class="v-msg" id="vMsg">AASPASS DRIVING CLUB</div></div>
+    <div class="puzzle-buttons" id="puzzleBtnContainer"></div>
+    <div class="progress-container">
+        <div class="progress-label"><span>Course Progress</span><span id="progressText">0%</span></div>
+        <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="driver-rank-container">
+        <div class="level-title-display" id="levelTitleDisplay">Beginner starter</div>
+    </div>
+    <div class="stage"><div class="selection-box"></div><div class="scroll-layer" id="scroller"><div class="pad"></div><div id="snaps"></div><div class="pad"></div></div><div class="cylinder" id="wheel"></div></div>
+</div>
+
+<div id="quiz-test-container">
+    <div class="header-status">
+        <div class="progress-container-q"><div id="progress-bar-q"></div></div>
+        <div class="flex justify-between items-center px-2 font-bold text-sm">
+            <span style="color: #00c853">درست: <span id="correct-count-q">0</span></span>
+            <div id="timer-box-q" class="hidden text-red-600 border border-red-600 px-3 py-1 rounded-full bg-red-50">وقت: <span id="timer-display-q">60</span>s</div>
+            <span>سوال: <span id="current-q-num">1</span>/<span id="total-q-num">12</span></span>
+        </div>
+    </div>
+    <div id="quiz-box-q" class="p-4 transition-opacity duration-500"></div>
+    <div id="result-card-q">
+        <h1 id="celeb-title-q" class="text-2xl font-black mb-2"></h1>
+        <p id="celeb-msg-q" class="font-bold text-gray-600 mb-4"></p>
+        <div id="celeb-icon-q" class="text-5xl mb-4"></div>
+        <button id="celeb-btn-q" class="btn-action w-full" onclick="handleQuizResult()"></button>
+    </div>
+    <button class="btn-puzzle-back" onclick="closeQuizTest()">← Back to Video</button>
+</div>
+
+<div id="puzzle-container">
+    <audio id="bg-music-1" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
+    <button class="btn-puzzle-back" onclick="closePuzzle1()">← Back to Video</button>
+    <div id="guideHandP1" class="guide-hand" style="display:none">☝️</div>
+    <div x-show="gamePhase1 === 1">
+        <div id="unlocker" x-show="!ready1" @click="ready1 = true; startPuzzle1Music(); speak('پہلے سیٹ برابر کریں، اس طرح ڈریگ کریں'); showPuzzle1Guide(); "><div class="text-center"><div class="text-6xl mb-4">🚗</div><div class="bg-[#0D1B3E] text-white px-10 py-5 rounded-full font-black text-2xl shadow-2xl">START MISSION</div></div></div>
+        <div class="app-container-1" x-show="ready1" x-cloak>
+            <div x-show="currentMode1 === 'before'" id="screen-before" class="flex flex-col h-full"><div class="header-banner">L1A: Starting <span class="highlight-text">4 Steps before starting</span></div><div class="grid-layout"><template x-for="(slot, i) in slots1" :key="i"><div class="target-box" :id="'p1-slot-'+i" :class="(slots1.findIndex(s => !s.img) === i) ? 'blink-target' : ''"><img x-show="slot.img" :src="slot.img" class="w-full h-full object-cover rounded-lg"><div x-show="slot.img && slot.isCorrect" class="absolute inset-0 bg-green-500/30 flex items-center justify-center text-white text-2xl font-bold">✔</div><span x-show="!slot.img" x-text="i + 1" style="color:rgba(255,255,255,.6);font-size:28px;font-weight:800;"></span></div></template></div><div class="curve-footer"><div class="grid grid-cols-2 gap-4"><template x-for="item in shuffledItems1" :key="item.id"><div style="width:160px;height:160px;position:relative;"><div :id="'p1-item-'+item.id" x-show="!item.used" class="draggable-item" @touchstart="startDrag1($event, item)" @touchmove="moveDrag1($event)" @touchend="endDrag1($event)"><img :src="item.url" class="w-full h-full object-cover" draggable="false"></div><div x-show="item.used" class="w-full h-full border-2 border-dashed rounded-[22px] flex items-center justify-center" :class="item.lastDropCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'"><span class="text-6xl font-bold" :class="item.lastDropCorrect ? 'text-green-500' : 'text-red-500'" x-text="item.lastDropCorrect ? '✔' : '✖'"></span></div></div></template></div></div></div>
+            <div x-show="currentMode1 === 'ignition'" class="flex flex-col h-full"><div class="header-wrapper"><div class="flex items-center gap-1"><span class="num-red">4</span><span class="step-txt">Steps</span><span class="arrow-box">➜</span></div><div class="starting-text">Starting</div><div class="flex items-center gap-1"><span class="arrow-box">➜</span><span class="num-red">4</span><span class="step-txt">Steps</span></div></div><div class="flex-1 flex justify-center items-center relative"><div class="switch-target" :class="isCranking1 ? 'engine-vibrate' : !keyStuck1 ? 'blink-target' : ''" id="dropZoneIgnition"><img src="Switch.png" class="w-full h-full object-cover"></div><img x-show="keyStuck1" src="key.png" class="absolute w-[100px] h-[100px] z-50 rotate-[-45deg]" :class="isCranking1 ? 'engine-vibrate' : ''"></div><div class="bg-white h-[38%] rounded-t-[45px] flex flex-col items-center p-6"><p style="color:#C0C0C0;font-size:12px;font-weight:800;margin-bottom:15px;text-transform:uppercase;">Insert Key to Start</p><div x-show="!keyStuck1" class="w-[130px] h-[130px] relative" @touchstart="startDragKey1($event)" @touchmove="moveDragKey1($event)" @touchend="endDragKey1($event)"><img src="key.png" class="w-full h-full object-contain" draggable="false"></div></div></div>
+            <div x-show="currentMode1 === 'after'" id="screen-after" class="flex flex-col h-full"><div class="header-wrapper"><div class="flex items-center gap-1"><span class="num-red">4</span><span class="step-txt">Steps</span><span class="arrow-box">➜</span></div><div class="starting-text-dark">Starting</div><div class="right-section"><span class="arrow-box">➜</span><span class="num-red">4</span><span class="step-txt">Steps</span></div></div><div class="grid-layout"><template x-for="(slot, i) in slots1" :key="i"><div class="target-box" :class="(slots1.findIndex(s => !s.img) === i) ? 'blink-target' : ''"><img x-show="slot.img" :src="slot.img" class="w-full h-full object-cover rounded-lg"><div x-show="slot.img && slot.isCorrect" class="absolute inset-0 bg-green-500/30 flex items-center justify-center text-white text-2xl font-bold">✔</div><span x-show="!slot.img" x-text="i + 1" style="color:rgba(255,255,255,.6);font-size:28px;font-weight:800;"></span></div></template></div><div class="curve-footer"><div class="grid grid-cols-2 gap-4"><template x-for="item in shuffledItems1" :key="item.id"><div style="width:160px;height:160px;position:relative;"><div x-show="!item.used" class="draggable-item" @touchstart="startDrag1($event, item)" @touchmove="moveDrag1($event)" @touchend="endDrag1($event)"><img :src="item.url" class="w-full h-full object-cover" draggable="false"></div><div x-show="item.used" class="w-full h-full border-2 border-dashed rounded-[22px] flex items-center justify-center" :class="item.lastDropCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'"><span class="text-6xl font-bold" :class="item.lastDropCorrect ? 'text-green-500' : 'text-red-500'" x-text="item.lastDropCorrect ? '✔' : '✖'"></span></div></div></template></div></div></div>
+        </div>
+    </div>
+    <div x-show="gamePhase1 === 2" x-cloak>
+        <div x-show="gameFinished2" class="congrats-overlay" x-transition><div class="congrats-card"><h1 class="text-4xl mb-4">🎉</h1><p class="text-2xl font-black text-gray-800 mb-2">Congratulations!</p><p class="text-lg font-bold text-gray-600">aap ny <span class="text-blue-600">L1A.starting</span> Wala class pass Kia hy.</p><p class="text-xl font-black text-green-600 mt-4">Mubarak ho! 🏆</p><button @click="finishL1A()" class="restart-btn mt-6">FINISH</button></div></div>
+        <div class="app-container-1">
+            <div class="header-patti"><div style="display:flex;align-items:baseline;"><span class="red-4">4</span><span class="steps-txt">Steps</span></div><span class="arrow-sq">➡</span><div class="start-pill">Starting</div><span class="arrow-sq">➡</span><div style="display:flex;align-items:baseline;"><span class="red-4">4</span><span class="steps-txt">Steps</span></div></div>
+            <div class="mission-grid"><template x-for="n in [0,1,2,3]" :key="n"><div class="drop-box" :id="'b-'+n"><span x-show="!placed2[n]" class="box-digit" x-text="n+1"></span><img x-show="placed2[n]" :src="placed2[n]" class="placed-gif"><div x-show="placed2[n]" class="status-mark-svg"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#22C55E"/></svg></div><div x-show="showError2 === n" class="error-overlay">❌</div></div></template></div>
+            <div class="ignition-section"><div class="switch-lock" id="lock-target"><img x-show="isStarted2" src="key.png" class="key-on-switch"><div x-show="isStarted2" class="status-mark-svg"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#22C55E"/></svg></div></div><img x-show="!isStarted2" src="key.png" class="key-start-pos" id="drag-key" @touchstart="pick2($event, 'key')" @touchmove="move2($event)" @touchend="drop2($event)"></div>
+            <div class="mission-grid"><template x-for="n in [4,5,6,7]" :key="n"><div class="drop-box" :id="'b-'+n"><span x-show="!placed2[n]" class="box-digit" x-text="n-3"></span><img x-show="placed2[n]" :src="placed2[n]" class="placed-gif"><div x-show="placed2[n]" class="status-mark-svg"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#22C55E"/></svg></div><div x-show="showError2 === n" class="error-overlay">❌</div></div></template></div>
+            <div class="items-pool" id="pool"><template x-for="item in items2" :key="item.id"><img x-show="!item.done" :src="item.url" class="drag-item" :style="`z-index:${item.id};`" @touchstart="pick2($event, item)" @touchmove="move2($event)" @touchend="drop2($event)"></template></div>
+            <div class="footer-controls"><div class="text-2xl font-black text-slate-700">⏳ <span x-text="seconds2"></span>s</div><button @click="resetGame()" class="restart-btn">🔄 RESTART</button></div>
+        </div>
+    </div>
+</div>
+<div id="puzzle-2-container">
+    <button class="btn-puzzle-back" onclick="closePuzzle2()">← Back to Video</button>
+    <div id="guideHandP2" class="guide-hand" style="display:none">☝️</div>
+    <div id="lesson-section-2" class="app-container" @click="startEverything2()">
+        <div x-show="gameWon2" class="win-overlay-2"><div class="bg-white p-8 rounded-[40px] border-[6px] border-green-500"><h2 class="text-5xl mb-4">🏆</h2><h3 class="text-3xl font-black text-gray-800 mb-2">Level 1 Passed!</h3><p class="text-xl font-bold text-blue-600">L2 UNLOCKED</p></div></div>
+        <div class="grid grid-cols-4 gap-3 px-4 mt-4 mb-4"><template x-for="n in [0,1,2,3,4,5,6,7]" :key="n"><div class="drop-box-2 flex items-center justify-center" :id="'p2-box-'+n" :class="boxContent2[n] && !errorInBox2[n] ? 'success-border' : ''"><img x-show="boxContent2[n]" :src="boxContent2[n]" class="w-full h-full object-cover rounded-xl" :class="errorInBox2[n] ? 'grayscale' : ''"><div x-show="boxContent2[n] && !errorInBox2[n]" class="status-mark-2 mark-pass-2">✔</div><div x-show="errorInBox2[n]" class="status-mark-2 mark-fail-2">✖</div></div></template></div>
+        <div class="interior-map-2" id="map-container-2" @click="handleMapClick2($event)"><img src="1000372168.png" class="w-full h-auto block" id="mainMap2"><div @click.stop="handleAction2(0)" id="hp-0" class="hotspot-2" style="top:81%;left:42%;width:55px;height:55px;"></div><div @click.stop="handleAction2(1)" class="hotspot-2" style="top:71.5%;left:26.5%;width:50px;height:50px;"></div><div @click.stop="handleAction2(2)" class="hotspot-2" style="top:81%;left:10.5%;width:55px;height:55px;"></div><div @click.stop="handleAction2(3)" class="hotspot-2" style="top:67%;left:8.5%;width:55px;height:55px;"></div><div @click.stop="handleAction2('key')" class="hotspot-2" style="top:54.5%;left:51%;width:60px;height:40px;"></div><div @click.stop="handleAction2(5)" class="hotspot-2" style="top:41%;left:46%;width:70px;height:70px;"></div><div @click.stop="handleAction2(6)" class="hotspot-2" style="top:87.5%;left:23%;width:45px;height:85px;"></div><div @click.stop="handleAction2(7)" class="hotspot-2" style="top:31%;left:75%;width:65px;height:65px;"></div><div @click.stop="handleAction2(8)" class="hotspot-2" style="top:45%;left:59%;width:60px;height:45px;"></div></div>
+        <div class="sticky bottom-0 bg-white p-4 flex justify-between items-center"><div class="text-xs font-black text-gray-800 uppercase" x-text="statusMsg2"></div><button @click="resetOnlyPhase2()" class="bg-red-600 text-white px-5 py-2 rounded-full text-[10px] font-black">RESET ROUND</button></div>
+    </div>
+</div>
+<audio id="sndDrop" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="sndWin" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="sndFail" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+<audio id="carStartSnd" src="start-engine.mp3"></audio>
+<audio id="dragSnd" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="passSnd" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="failSnd" src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3"></audio>
+<audio id="engineSnd" src="start-engine.mp3"></audio>
+<audio id="victorySnd" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="bgMusicLesson" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
+<audio id="wheelTick" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/3005/3005-preview.mp3"></audio>
+<audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/3003/3003-preview.mp3"></audio>
+
+<script>
+    function handleLogin() {
+        const name = document.getElementById('user-name').value;
+        const phone = document.getElementById('user-phone').value;
+        if(name.length < 3 || phone.length < 10) {
+            alert("Please enter valid Name and Phone!");
+            return;
+        }
+        localStorage.setItem('driver_name', name);
+        localStorage.setItem('driver_phone', phone);
+        
+        let userCounter = localStorage.getItem('ads_user_counter');
+        if(!userCounter) {
+            userCounter = 1610;
+        } else {
+            userCounter = parseInt(userCounter) + 1;
+        }
+        localStorage.setItem('ads_user_counter', userCounter);
+        localStorage.setItem('driver_id', 'ADS' + userCounter);
+
+        document.getElementById('login-overlay').style.display = 'none';
+    }
+
+    let logoClickCount = 0;
+    let logoClickTimer;
+
+    function handleAdminClick() {
+        logoClickCount++;
+        clearTimeout(logoClickTimer);
+        logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 2000);
+        
+        if(logoClickCount >= 5) {
+            openAdminPanel();
+            logoClickCount = 0;
+        }
+    }
+
+    function openAdminPanel() {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-user-info').innerText = (localStorage.getItem('driver_name') || "Not Logged In") + " (" + (localStorage.getItem('driver_phone') || "N/A") + ")";
+    }
+
+    function verifyAdminPass() {
+        const pass = document.getElementById('admin-pass').value;
+        if(pass === "Ads786") {
+            document.getElementById('admin-controls').style.display = 'block';
+        } else {
+            alert("Wrong Password!");
+        }
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('admin-panel').style.display = 'none';
+        document.getElementById('admin-controls').style.display = 'none';
+        document.getElementById('admin-pass').value = '';
+    }
+
+    function unlockAllLevelsAdmin() {
+        levelData.forEach(l => {
+            l.lock = false;
+            l.passed = true;
+        });
+        coursesPassedCount = levelData.length;
+        renderCards();
+        updateGlobalProgress();
+        alert("All Levels Unlocked!");
+    }
+
+    function jumpToLastLevelAdmin() {
+        levelData.forEach((l, idx) => {
+            if(idx < levelData.length - 1) {
+                l.lock = false;
+                l.passed = true;
+            } else {
+                l.lock = false;
+                l.passed = false;
+            }
+        });
+        coursesPassedCount = levelData.length - 1;
+        renderCards();
+        updateGlobalProgress();
+        showLevels();
+        scrollToLevel(levelData.length - 1);
+        closeAdminPanel();
+    }
+
+    function showCertificateAdmin() {
+        closeAdminPanel();
+        setTimeout(() => {
+            showFinalCertificate();
+        }, 100);
+    }
+
+    function resetProgressAdmin() {
+        if(confirm("Are you sure you want to reset all progress?")) {
+            levelData.forEach((l, idx) => {
+                l.passed = false;
+                l.lock = (idx === 0) ? false : true;
+            });
+            coursesPassedCount = 0;
+            puzzle1Passed = false;
+            puzzle2Passed = false;
+            renderCards();
+            updateGlobalProgress();
+            alert("Progress Reset!");
+        }
+    }
+
+    function showFinalCertificate() {
+        const name = localStorage.getItem('driver_name') || "STUDENT NAME";
+        const id = localStorage.getItem('driver_id') || "ADS1610";
+        
+        document.getElementById('cert-user-name').innerText = name.toUpperCase();
+        document.getElementById('cert-user-id').innerText = id;
+        document.getElementById('certificate-modal').style.display = 'block';
+        confetti({particleCount: 200, spread: 100, origin: {y: 0.6}});
+    }
+
+    async function downloadCert() {
+        const certElement = document.getElementById('cert-to-capture');
+        const canvas = await html2canvas(certElement, { scale: 2 });
+        const link = document.createElement('a');
+        link.download = 'Aaspass_Certificate_' + (localStorage.getItem('driver_name') || 'Student') + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    const allLevelTests = {
+        "L1B": [
+            { id: 1, q: "گاڑی روانہ کرنے کے لیے پہلا کام کون سا ہے؟", options: ["ایکسیلیٹر دبانا", "کلچ چھوڑنا", "ایکسیلیٹر چھوڑنا"], correct: 0, audio: "q1.m4a", img: "l1bq1.jpg", timings: { qEnd: 4, o1End: 6.5, o2End: 9 } },
+            { id: 2, q: "ایکسیلیٹر پیڈل پر پاؤں کیسے رکھیں گے؟", options: ["سیدھا پاؤں", "کراس (ٹیڑھا)"], correct: 1, audio: "q2.m4a", img: "l1bq2.jpg", timings: { qEnd: 3.5, o1End: 5.5, o2End: 8 } },
+            { id: 3, q: "گاڑی رواں کرنے کے لیے ایکسیلیٹر کتنا دبائیں گے؟", options: ["بہت زیادہ", "بہت کم", "مناسب اور برابر"], correct: 2, audio: "q3.m4a", img: "l1bq3.jpg", timings: { qEnd: 4, o1End: 6, o2End: 8.5 } },
+            { id: 4, q: "جب ہم برابر ایکسیلیٹر دبا لیں، تو اس کے بعد کیا کریں گے؟", options: ["ایکسیلیٹر مزید دبائیں گے", "اسی پوزیشن پر رکھیں گے", "ایکسیلیٹر چھوڑ دیں گے"], correct: 1, audio: "q4.m4a", img: "l1bq4.jpg", timings: { qEnd: 4.5, o1End: 7, o2End: 9.5 } },
+            { id: 5, q: "ایکسیلیٹر برابر کرنے کے بعد اگلا قدم کیا ہے؟", options: ["کلچ چھوڑیں گے", "بریک دبائیں گے", "نیوٹرل کریں گے"], correct: 0, audio: "q5.m4a", img: "l1bq5.jpg", timings: { qEnd: 4, o1End: 6.5, o2End: 9 } },
+            { id: 6, q: "کلچ کو چھوڑنے کا طریقہ کیا ہونا چاہیے؟", options: ["ایک دم سے", "آرام سے", "مکمل چھوڑیں"], correct: 1, audio: "q6.m4a", img: "l1bq6.jpg", timings: { qEnd: 4, o1End: 6, o2End: 8.5 } },
+            { id: 7, q: "کلچ چھوڑتے وقت پاؤں ko پیچھے کیسے کریں گے؟", options: ["انگوٹھا اوپر کریں گے", "ایڑی کو پیچھے لے کر آئیں گے"], correct: 1, audio: "q7.m4a", img: "l1bq7.jpg", timings: { qEnd: 4.5, o1End: 7, o2End: 9.5 } },
+            { id: 8, q: "کلچ کو کب تک (کتنی دیر) چھوڑنا جاری رکھیں گے؟", options: ["جب گاڑی روانہ ہو جائے", "جب گاڑی بہت تیز ہو جائے", "جب انجن بند ہو جائے"], correct: 0, audio: "q8.m4a", img: "l1bq8.jpg", timings: { qEnd: 4.5, o1End: 7, o2End: 9.5 } },
+            { id: 9, q: "جب گاڑی اپنی جگہ سے روانہ ہونے لگے تو اسی وقت کیا کریں کلچ کے ساتھ؟", options: ["کلچ اور نہ چھوڑیں", "اور چھوڑیں", "واپس دبائیں"], correct: 0, audio: "q9.m4a", img: "l1bq9.jpg", timings: { qEnd: 5, o1End: 7.5, o2End: 10 } },
+            { id: 10, q: "گاڑی 10 سے 15 فٹ آگے چلی جائے تو پہلا کام کیا کریں گے؟", options: ["کلچ دوبارہ دبائیں گے", "ایکسیلیٹر کم کریں گے", "تیز ریس دیں گے"], correct: 1, audio: "q10.m4a", img: "l1bq10.jpg", timings: { qEnd: 5, o1End: 7.5, o2End: 10 } },
+            { id: 11, q: "ریس کم کرنے کے بعد دوسرا کام کیا کریں؟", options: ["کلچ چھوڑیں", "کلچ دبائیں", "کلچ اسی طرح پکڑیں"], correct: 0, audio: "q11.m4a", img: "l1bq11.jpg", timings: { qEnd: 5, o1End: 7.5, o2End: 10 } },
+            { id: 12, q: "کلچ مکمل چھوڑنے کے بعد بایاں پاؤں کہاں رکھیں؟", options: ["کلچ کے اوپر ہلکا سا رکھیں", "پیچھے فرش پر رکھیں", "بریک کے اوپر رکھیں"], correct: 1, audio: "q12.m4a", img: "l1bq12.jpg", timings: { qEnd: 4.5, o1End: 7, o2End: 9.5 } }
+        ],
+        "L1C": [], "L1D": [], "L2A": [], "L2B": [], "L2C": [], "L3A": [], "L3B": [], "L3C": [], "L4A": [], "L4B": [], "L5A": [], "L5B": [], "L6A": [], "L6B": [],
+        "L7A": [
+            { id: 1, q: "یہ ٹریفک سائن کس چیز کو ظاہر کرتا ہے؟", options: ["آگے موڑ ہے", "راستہ دیں", "آگے راستہ بند ہے"], correct: 1, audio: "l7aq1.m4a", img: "sign_yield.jpg", timings: { qEnd: 4, o1End: 6, o2End: 8 } },
+        ],
+        "L7B": [
+            { id: 1, q: "سرخ بتی پر گاڑی کو کہاں روکنا چاہیے؟", options: ["زیبرا کراسنگ سے پہلے", "چوک کے درمیان", "سگنل کے بالکل نیچے"], correct: 0, audio: "l7bq1.m4a", img: "traffic_light.jpg", timings: { qEnd: 4, o1End: 6, o2End: 8 } },
+        ]
+    };
+
+    let puzzle1Passed=false,puzzle2Passed=false, coursesPassedCount=0;
+    const groupNames={'L1':'Beginner starter','L2':'Control master','L3':'Turn expert','L4':'Smooth driver','L5':'Road performer','L6':'Pro controller','L7':'Smart driver'};
+    let bannerIdx=0;setInterval(()=>{bannerIdx=(bannerIdx+1)%3;const b=document.getElementById('bannerSlider'); if(b) b.style.transform=`translateX(-${(bannerIdx*100)/3}%)`},2000);
+    
+    function showLevels(){document.getElementById('dashboard-page').style.display='none';document.getElementById('levels-page').style.display='block';updateGlobalProgress();start3D();playVideo('l1a.starting.mp4')}
+    function hideLevels(){const vp=document.getElementById('vPlayer');vp.pause();vp.src="";vp.style.display='none';document.getElementById('vMsg').style.display='block';document.getElementById('levels-page').style.display='none';document.getElementById('dashboard-page').style.display='flex'}
+    
+    function playVideo(src){
+        const p=document.getElementById('vPlayer');
+        document.getElementById('vMsg').style.display='none';
+        p.style.display='block'; p.src=src; p.load();
+        const c=document.getElementById('puzzleBtnContainer');
+        const levelID = getLevelIDByVideo(src);
+        if(src==='l1a.starting.mp4'){
+            let btnClass = (puzzle1Passed && puzzle2Passed) ? 'btn-puz p1 btn-puz-passed' : 'btn-puz p1';
+            c.innerHTML=`<button id="mainPuzzleBtn" class="${btnClass}" onclick="openPuzzle1()">Start Puzzle</button>`;
+        } else if(allLevelTests[levelID]) {
+            c.innerHTML=`<button class="btn-test" onclick="openQuizTest('${levelID}')">Start ${levelID} Test</button>`;
+        } else { c.innerHTML=''; }
+    }
+    function getLevelIDByVideo(src){const match = levelData.find(l => l.v === src); return match ? match.id : null;}
+    function playSelectedVideo(){const vp=document.getElementById('vPlayer');if(vp.paused&&vp.src)vp.play();else{const idx=Math.round(document.getElementById('scroller').scrollTop/70),l=levelData[idx];if(l&&!l.lock)playVideo(l.v);else if(l&&l.lock)speakUrdu2("Pehle pichla level pass karein.")}}
+    function updateGlobalProgress(){ let p = coursesPassedCount * 5.5555; if(p > 100) p = 100; document.getElementById('progressFill').style.width=p+'%'; document.getElementById('progressText').innerText=Math.floor(p)+'%'; }
+    function handlePuzzle2Click(){if(!puzzle1Passed)speakUrdu2("Pehle puzzle 1 pass karein");else openPuzzle2()}
+    function openPuzzle1(){document.getElementById('vPlayer').pause();document.getElementById('puzzle-container').style.display='block'}
+    function closePuzzle1(){document.getElementById('puzzle-container').style.display='none';document.getElementById('bg-music-1').pause();updateGlobalProgress()}
+    function openPuzzle2(){document.getElementById('puzzle-container').style.display='none';document.getElementById('puzzle-2-container').style.display='block'; showPuzzle2Guide(); speakUrdu2("Sab se pehle seat par click karein, is tarah"); }
+    function closePuzzle2(){document.getElementById('puzzle-2-container').style.display='none';document.getElementById('bgMusicLesson').pause();updateGlobalProgress()}
+    function startPuzzle1Music(){const m=document.getElementById('bg-music-1');m.volume=.2;m.play()}
+    
+    function showPuzzle1Guide(){
+        const hand = document.getElementById('guideHandP1');
+        hand.style.display = 'block';
+        setTimeout(() => {
+            const startItem = document.getElementById('p1-item-b1');
+            const targetSlot = document.getElementById('p1-slot-0');
+            if(!startItem || !targetSlot) return;
+            const sRect = startItem.getBoundingClientRect();
+            const tRect = targetSlot.getBoundingClientRect();
+            hand.style.left = sRect.left + (sRect.width/2) + 'px'; 
+            hand.style.top = sRect.top + (sRect.height/2) + 'px';
+            setTimeout(() => { 
+                hand.style.left = tRect.left + (tRect.width/2) + 'px'; 
+                hand.style.top = tRect.top + (tRect.height/2) + 'px'; 
+            }, 1000);
+            setTimeout(() => hand.style.display = 'none', 2500);
+        }, 100);
+    }
+
+    function showPuzzle2Guide(){
+        const hand = document.getElementById('guideHandP2');
+        hand.style.display = 'block';
+        setTimeout(() => {
+            const hotspot = document.getElementById('hp-0');
+            const box = document.getElementById('p2-box-0');
+            if(!hotspot || !box) return;
+            const hRect = hotspot.getBoundingClientRect();
+            const bRect = box.getBoundingClientRect();
+            hand.style.left = hRect.left + (hRect.width/2) + 'px'; 
+            hand.style.top = hRect.top + (hRect.height/2) + 'px';
+            setTimeout(() => { 
+                hand.style.left = bRect.left + (bRect.width/2) + 'px'; 
+                hand.style.top = bRect.top + (bRect.height/2) + 'px'; 
+            }, 1000);
+            setTimeout(() => hand.style.display = 'none', 3000);
+        }, 100);
+    }
+
+    let activeQuestions = []; let activeLevelID = ""; let correctScoreQ = 0, answeredCountQ = 0, isTimerModeQ = false, timeLeftQ = 60, timerIdQ, currentAudioQ = null, quizPassed = false;
+    
+    function openQuizTest(levelID){ 
+        activeLevelID = levelID; 
+        activeQuestions = allLevelTests[levelID]; 
+        if(activeQuestions.length === 0) return;
+        document.getElementById('vPlayer').pause(); 
+        document.getElementById('quiz-test-container').style.display='block'; 
+        initQuizLogic(); 
+    }
+    
+    function closeQuizTest(){ document.getElementById('quiz-test-container').style.display='none'; stopAllVoicesQ(); clearInterval(timerIdQ); }
+    
+    function initQuizLogic() {
+        const container = document.getElementById('quiz-box-q'); 
+        document.getElementById('result-card-q').style.display = 'none'; 
+        container.innerHTML = ''; 
+        container.style.opacity = '1';
+        correctScoreQ = 0; answeredCountQ = 0; quizPassed = false; stopAllVoicesQ(); 
+        document.getElementById('total-q-num').innerText = activeQuestions.length; 
+        updateStatsQ();
+
+        activeQuestions.forEach((item, index) => {
+            const card = document.createElement('div'); 
+            card.className = 'question-card bg-white p-5 rounded-2xl mb-6 shadow-md text-right border-b-4 border-gray-200'; 
+            card.id = `q-card-q-${index}`;
+            let imageHTML = item.img ? `<div class="q-img-container"><img src="${item.img}" class="q-img"></div>` : '';
+            card.innerHTML = `
+                <div class="question-text font-black text-xl mb-4 text-gray-800" id="q-text-q-${index}">${index + 1}. ${item.q}</div>
+                ${imageHTML}
+                <div class="options-list">
+                    ${item.options.map((opt, optIdx) => `
+                    <button class="option-btn-q" id="opt-q-${index}-${optIdx}" onclick="checkAnswerQ(${index}, ${optIdx}, this)">
+                        <div class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center font-bold text-gray-400">${String.fromCharCode(65 + optIdx)}</div>
+                        <span>${opt}</span>
+                    </button>`).join('')}
+                </div>`;
+            container.appendChild(card);
+        });
+        document.getElementById('quiz-test-container').scrollTo(0,0); 
+        if(isTimerModeQ) { 
+            timeLeftQ = (activeLevelID.startsWith('L7')) ? 90 : 60;
+            document.getElementById('timer-box-q').classList.remove('hidden'); 
+            startTimerQ(); 
+        } else {
+            document.getElementById('timer-box-q').classList.add('hidden');
+        }
+        playQuestionAudioQ(0);
+    }
+
+    function playQuestionAudioQ(idx) {
+        stopAllVoicesQ(); document.querySelectorAll('.blink-active').forEach(el => el.classList.remove('blink-active'));
+        const item = activeQuestions[idx]; if(!item || !item.audio) return;
+        currentAudioQ = new Audio(item.audio); const qText = document.getElementById(`q-text-q-${idx}`); if(qText) qText.classList.add('blink-active');
+        currentAudioQ.play().catch(e => console.log("Audio blocked"));
+        currentAudioQ.addEventListener('timeupdate', () => {
+            if(!item.timings) return; const time = currentAudioQ.currentTime; const timings = item.timings;
+            if(time >= timings.qEnd) {
+                if(qText) qText.classList.remove('blink-active');
+                if(time < timings.o1End) { document.getElementById(`opt-q-${idx}-0`)?.classList.add('blink-active'); }
+                else if(time < timings.o2End) { document.getElementById(`opt-q-${idx}-0`)?.classList.remove('blink-active'); document.getElementById(`opt-q-${idx}-1`)?.classList.add('blink-active'); }
+                else if(time >= timings.o2End) { document.getElementById(`opt-q-${idx}-1`)?.classList.remove('blink-active'); document.getElementById(`opt-q-${idx}-2`)?.classList.add('blink-active'); }
+            }
+        });
+        currentAudioQ.onended = () => { document.querySelectorAll('.blink-active').forEach(el => el.classList.remove('blink-active')); };
+    }
+    
+    function stopAllVoicesQ() { if(currentAudioQ) { currentAudioQ.pause(); currentAudioQ.currentTime = 0; } }
+    
+    function startTimerQ() { 
+        clearInterval(timerIdQ); 
+        timerIdQ = setInterval(() => { 
+            timeLeftQ--; 
+            document.getElementById('timer-display-q').innerText = timeLeftQ; 
+            if(timeLeftQ <= 0) { 
+                clearInterval(timerIdQ); 
+                document.getElementById('sndFail').play(); 
+                showResultCardQ("وقت ختم!", "ٹائم ختم ہو گیا، دوبارہ کوشش کریں", "❌", false); 
+            } 
+        }, 1000); 
+    }
+    
+    function checkAnswerQ(qIdx, selectedIdx, btn) {
+        const card = document.getElementById(`q-card-q-${qIdx}`); if(card.classList.contains('answered')) return;
+        card.classList.add('answered'); answeredCountQ++; stopAllVoicesQ(); document.querySelectorAll('.blink-active').forEach(el => el.classList.remove('blink-active'));
+        if(selectedIdx === activeQuestions[qIdx].correct) {
+            btn.classList.add('correct'); document.getElementById('sound-correct').play(); correctScoreQ++; updateStatsQ();
+            if(answeredCountQ === activeQuestions.length) { 
+                if(isTimerModeQ) {
+                    clearInterval(timerIdQ);
+                    confetti({particleCount: 200, spread: 80, origin: {y: 0.6}});
+                    document.getElementById('victorySnd').play();
+                    if(activeLevelID === "L7B") {
+                        showResultCardQ("کورس مکمل! 🎓", "Mubarak ho! Aap ne driving course mukammal kar lia hai.", "👑", true, true);
+                        setTimeout(() => { closeQuizTest(); showFinalCertificate(); }, 2000);
+                    } else {
+                        showResultCardQ("لیول مکمل! 🎖️", `Mubarak ho! App ne ${activeLevelID} pass kar lia.`, "🌟", true, true); 
+                    }
+                } else {
+                    confetti({particleCount: 150, spread: 60, origin: {y: 0.6}});
+                    document.getElementById('sndWin').play();
+                    showResultCardQ("شاندار! 🎉", "Aap ne sary sawal thek kye! Ab Timer Challenge start krain.", "🏆", true, false); 
+                }
+            } else { setTimeout(() => { const next = document.getElementById(`q-card-q-${qIdx+1}`); if(next) { next.scrollIntoView({behavior:'smooth', block:'center'}); playQuestionAudioQ(qIdx+1); } }, 600); }
+        } else {
+            btn.classList.add('wrong'); document.getElementById('sound-wrong').play();
+            if(isTimerModeQ) { clearInterval(timerIdQ); setTimeout(() => { initQuizLogic(); }, 800); } 
+            else { setTimeout(() => showResultCardQ("غلط جواب!", "Ghalti insan se hoti hai! Phir se koshish krain.", "❌", false), 800); }
+        }
+    }
+    
+    function showResultCardQ(title, msg, icon, success, timerFin = false) {
+        document.getElementById('result-card-q').style.display = 'block';
+        document.getElementById('celeb-title-q').innerText = title;
+        document.getElementById('celeb-msg-q').innerText = msg;
+        document.getElementById('celeb-icon-q').innerText = icon;
+        const btn = document.getElementById('celeb-btn-q');
+        if(success && !timerFin) btn.innerText = "Timer Challenge!";
+        else if(success && timerFin) btn.innerText = (activeLevelID === "L7B") ? "Show Certificate" : "Next Level ▶";
+        else btn.innerText = "Retry";
+    }
+    
+    function handleQuizResult() {
+        const btnText = document.getElementById('celeb-btn-q').innerText;
+        if(btnText === "Timer Challenge!") { isTimerModeQ = true; initQuizLogic(); }
+        else if(btnText === "Next Level ▶") { unlockNextLevel(); closeQuizTest(); }
+        else if(btnText === "Show Certificate") { closeQuizTest(); showFinalCertificate(); }
+        else { initQuizLogic(); }
+    }
+    
+    function updateStatsQ() { document.getElementById('correct-count-q').innerText = correctScoreQ; document.getElementById('current-q-num').innerText = Math.min(answeredCountQ + 1, activeQuestions.length); document.getElementById('progress-bar-q').style.width = (answeredCountQ / activeQuestions.length) * 100 + '%'; }
+    
+    function unlockNextLevel() { 
+        const currentIdx = levelData.findIndex(l => l.id === activeLevelID); 
+        if(currentIdx !== -1) {
+            levelData[currentIdx].passed = true;
+            coursesPassedCount += 1;
+            if(levelData[currentIdx+1]) {
+                levelData[currentIdx+1].lock = false;
+                playVideo(levelData[currentIdx+1].v);
+                scrollToLevel(currentIdx + 1);
+            }
+        }
+        renderCards(); updateGlobalProgress(); isTimerModeQ = false; 
+    }
+
+    function scrollToLevel(idx) {
+        const sc = document.getElementById('scroller');
+        if(sc) sc.scrollTo({top: idx * 70, behavior: 'smooth'});
+    }
+
+    const levelData=[
+        {id:'L1A',n:'Starting',g:'L1',img:'starting.jpg',v:'l1a.starting.mp4',lock:!1,passed:!1},
+        {id:'L1B',n:'Moving',g:'L1',img:'moving.jpg',v:'l1b.moving.mp4',lock:!0,passed:!1},
+        {id:'L1C',n:'Steering',g:'L1',img:'steering.jpg',v:'l1c.steering.mp4',lock:!0,passed:!1},
+        {id:'L1D',n:'Stopping',g:'L1',img:'stopping.jpg',v:'l1d.stoping.mp4',lock:!0,passed:!1},
+        {id:'L2A',n:'Power Formula',g:'L2',img:'p.formula.jpg',v:'l2a.powerformula.mp4',lock:!0,passed:!1},
+        {id:'L2B',n:'Basic Control',g:'L2',img:'b.control.jpg',v:'l2b.basiccontrol.mp4',lock:!0,passed:!1},
+        {id:'L2C',n:'Reverse Turn',g:'L2',img:'r.turn.jpg',v:'l2c.reversturn.mp4',lock:!0,passed:!1},
+        {id:'L3A',n:'2nd Gear',g:'L3',img:'2nd.gair.jpg',v:'l3a.2ndgair.mp4',lock:!0,passed:!1},
+        {id:'L3B',n:'Gear Formula',g:'L3',img:'gair.formula.jpg',v:'l3b.gairformula.mp4',lock:!0,passed:!1},
+        {id:'L3C',n:'Full Turning',g:'L3',img:'f.cutting.jpg',v:'l3c.fullturn.mp4',lock:!0,passed:!1},
+        {id:'L4A',n:'3rd Gear',g:'L4',img:'3rd.gair.jpg',v:'l4a.3rdgair.mp4',lock:!0,passed:!1},
+        {id:'L4B',n:'Gair Motion',g:'L4',img:'gair.motion.jpg',v:'l4b.gairmotion.mp4',lock:!0,passed:!1},
+        {id:'L5A',n:'4th Gear',g:'L5',img:'4th.gair.jpg',v:'l5a.4thgair.mp4',lock:!0,passed:!1},
+        {id:'L5B',n:'Overtaking',g:'L5',img:'overtake.jpg',v:'l5b.overtake.mp4',lock:!0,passed:!1},
+        {id:'L6A',n:'Uphill Drive',g:'L6',img:'uphill.jpg',v:'l6a.uphillmove.mp4',lock:!0,passed:!1},
+        {id:'L6B',n:'L Parking',g:'L6',img:'l.test.jpg',v:'l6b.lparking.mp4',lock:!0,passed:!1},
+        {id:'L7A',n:'Road Signs',g:'L7',img:'r.signs.jpg',v:'l7a.roadsigns.mp4',lock:!0,passed:!1},
+        {id:'L7B',n:'Road signs 2',g:'L7',img:'t.rules.jpg',v:'l7b.trafficrules.mp4',lock:!0,passed:!1}
+    ];
+    
+    function renderCards(){
+        const w=document.getElementById('wheel'),s=document.getElementById('snaps');
+        w.innerHTML="";s.innerHTML="";
+        levelData.forEach((l, idx)=>{
+            const c=document.createElement('div');
+            c.className=`card ${l.g} ${l.lock?'is-locked':''} ${l.passed?'is-passed':''}`;
+            c.innerHTML=`<img src="${l.img}" onerror="this.src='level.icons.jpg'"><h4>${l.id}: <span>${l.n}</span></h4><div class="lock-icon">${l.passed?'✔':(l.lock?'🔒':'▶')}</div>`;
+            w.appendChild(c);
+            const sn=document.createElement('div');
+            sn.className='snap';
+            sn.onclick=()=>{if(!l.lock && !l.passed)playVideo(l.v);else if(l.passed)speakUrdu2("Passed");else speakUrdu2("Locked")};
+            s.appendChild(sn)
+        })
+    }
+    renderCards();
+    let lastSnapIdx = -1;
+    function start3D(){const sc=document.getElementById('scroller'),sh=70,ra=250;function up(){if(document.getElementById('levels-page').style.display==='none')return;const sp=sc.scrollTop/sh,idx=Math.round(sp);if(idx !== lastSnapIdx){document.getElementById('wheelTick').currentTime = 0;document.getElementById('wheelTick').play();lastSnapIdx = idx;}if(levelData[idx])document.getElementById('levelTitleDisplay').innerText=groupNames[levelData[idx].g];document.querySelectorAll('.card').forEach((c,i)=>{const d=i-sp,a=d*18,y=Math.sin(a*Math.PI/180)*ra,z=(Math.cos(a*Math.PI/180)*ra)-ra;c.style.transform=`translate3d(-50%,${y}px,${z}px) rotateX(${-a}deg)`;c.style.opacity=Math.max(0,1-Math.abs(d)*.45)});requestAnimationFrame(up)}up()}
+    function speakUrdu2(t){window.speechSynthesis.cancel();let m=new SpeechSynthesisUtterance(t);m.lang='hi-IN';window.speechSynthesis.speak(m)}
+    function mainSystem(){return{gamePhase1:1,ready1:!1,currentMode1:'before',slots1:[],isCranking1:!1,keyStuck1:!1,config1:{before:{items:[{id:'b1',url:'1_seat.gif',msg:'سیٹ برابر'},{id:'b2',url:'2_clutch.gif',msg:'کلچ دبا دیا'},{id:'b3',url:'3_neutral.gif',msg:'گئیر نیوٹرل'},{id:'b4',url:'4_1st-gair.gif',msg:'پہلا گئیر'}],order:['b1','b2','b3','b4']},after:{items:[{id:'a1',url:'1_tires.gif',msg:'ٹائر برابر'},{id:'a2',url:'2_h-brake.gif',msg:'ہینڈ بریک نیچے'},{id:'a3',url:'3_sideglass.gif',msg:'شیشے برابر'},{id:'a4',url:'4_Indicator.gif',msg:'اشارہ لگا دیا'}],order:['a1','a2','a3','a4']}},shuffledItems1:[],seconds2:60,placed2:Array(8).fill(null),showError2:null,items2:[],active2:null,isStarted2:!1,gameFinished2:!1,currentStep2:0,rawItems2:[{id:0,url:'1_seat.gif'},{id:1,url:'2_clutch.gif'},{id:2,url:'3_neutral.gif'},{id:3,url:'4_1st-gair.gif'},{id:4,url:'1_tires.gif'},{id:5,url:'2_h-brake.gif'},{id:6,url:'3_sideglass.gif'},{id:7,url:'4_Indicator.gif'}],lessonStep2:0,gameWon2:!1,statusMsg2:"TAP TO START",boxContent2:Array(8).fill(null),errorInBox2:Array(8).fill(!1),lessonMusicStarted2:!1,actions2:{0:{gif:'1_seat.gif',voice:'Seat'},1:{gif:'2_clutch.gif',voice:'Clutch'},2:{gif:'3_neutral.gif',voice:'Neutral'},3:{gif:'4_1st-gair.gif',voice:'First Gear'},5:{gif:'1_tires.gif',voice:'Tires'},6:{gif:'2_h-brake.gif',voice:'Handbrake'},7:{gif:'3_sideglass.gif',voice:'Side Glass'},8:{gif:'4_Indicator.gif',voice:'Ishara'}},initApp(){this.shuffleItems1();this.initGame2()},speak(t){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ur-PK';window.speechSynthesis.speak(u)},shuffleItems1(){let m=this.currentMode1==='before'?this.config1.before:this.config1.after;this.slots1=Array.from({length:4},()=>({img:null,id:null,isCorrect:!1}));this.shuffledItems1=m.items.map(i=>({...i,used:!1,lastDropCorrect:!0})).sort(()=>Math.random()-0.5)},startDrag1(e,i){this.activeItem1=i;e.currentTarget.classList.add('dragging')},moveDrag1(e){if(!this.activeItem1)return;let el=document.querySelector('.dragging'),t=e.touches[0];if(el){el.style.left=(t.clientX-80)+'px';el.style.top=(t.clientY-80)+'px'}},endDrag1(e){if(!this.activeItem1)return;let t=e.changedTouches[0],m=this.currentMode1==='before'?this.config1.before:this.config1.after,drop=!1,id=this.currentMode1==='before'?'screen-before':'screen-after';document.getElementById(id).querySelectorAll('.target-box').forEach((z,i)=>{let r=z.getBoundingClientRect();if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){if(i>0&&!this.slots1[i-1].img){this.speak("Pehle pichla");return}if(!this.slots1[i].img){if(this.activeItem1.id===m.order[i]){this.slots1[i].img=this.activeItem1.url;this.slots1[i].isCorrect=!0;this.activeItem1.used=!0;document.getElementById('sndDrop').play();this.speak(this.activeItem1.msg);drop=!0}else{document.getElementById('sndFail').play();this.shuffleItems1();drop=!0}}}});document.querySelectorAll('.dragging').forEach(el=>{el.classList.remove('dragging');el.style.left=el.style.top=''});this.activeItem1=null;if(drop)this.checkProgress1()},checkProgress1(){if(this.slots1.filter(s=>s.img).length===4)setTimeout(()=>{document.getElementById('sndWin').play();if(this.currentMode1==='before')this.currentMode1='ignition';else{this.gamePhase1=2;this.startTimer2()}},600)},startDragKey1(e){e.currentTarget.classList.add('dragging')},moveDragKey1(e){let el=document.querySelector('.dragging'),t=e.touches[0];if(el){el.style.left=(t.clientX-65)+'px';el.style.top=(t.clientY-65)+'px'}},endDragKey1(e){let t=e.changedTouches[0],r=document.getElementById('dropZoneIgnition').getBoundingClientRect();if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){this.keyStuck1=!0;this.isCranking1=!0;document.getElementById('carStartSnd').play();setTimeout(()=>{this.isCranking1=!1;this.currentMode1='after';this.shuffleItems1()},2500)}document.querySelectorAll('.dragging').forEach(el=>{el.classList.remove('dragging');el.style.left=el.style.top=''})},initGame2(){this.items2=this.rawItems2.map((i,idx)=>({...i,done:!1})).sort(()=>Math.random()-0.5);this.placed2=Array(8).fill(null);this.currentStep2=0;this.isStarted2=!1;this.gameFinished2=!1;this.seconds2=60;},startTimer2(){this.initGame2(); let t=setInterval(()=>{if(this.gamePhase1===2&&this.seconds2>0&&!this.gameFinished2)this.seconds2--;else if(this.gamePhase1===2&&this.seconds2<=0){clearInterval(t);this.initGame2();}},1000)},pick2(e,i){this.active2=i;document.getElementById('dragSnd').play();let el=e.target,t=e.touches[0];el.classList.add('dragging');},move2(e){if(!this.active2)return;e.preventDefault();let t=e.touches[0],el=e.target;el.style.left=(t.clientX-45)+'px';el.style.top=(t.clientY-45)+'px'},drop2(e){if(!this.active2)return;let t=e.changedTouches[0],h=!1;for(let i=0;i<8;i++){let r=document.getElementById('b-'+i).getBoundingClientRect();if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){if(this.active2!=='key'&&this.active2.id===i&&i===this.currentStep2){this.placed2[i]=this.active2.url;this.active2.done=!0;this.currentStep2++;document.getElementById('passSnd').play();h=!0;if(i===3)this.currentStep2=99}else if(this.active2!=='key'){this.showError2=i;document.getElementById('failSnd').play();setTimeout(()=>{this.showError2=null;this.initGame2()},800);h=!0}}}if(this.active2==='key'){let r=document.getElementById('lock-target').getBoundingClientRect();if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){if(this.currentStep2===99){this.isStarted2=!0;this.currentStep2=4;document.getElementById('engineSnd').play();h=!0}else{document.getElementById('failSnd').play();setTimeout(()=>this.initGame2(),800);h=!0}}}e.target.classList.remove('dragging');e.target.style.left=e.target.style.top='';this.active2=null;if(this.placed2.every(p=>p)&&this.isStarted2){
+            confetti({particleCount: 200, spread: 100, origin: {y: 0.6}});
+            this.gameFinished2=!0; puzzle1Passed=true; openPuzzle2(); }},resetGame(){this.initGame2();},finishL1A(){this.completeL1A(); closePuzzle2();},startEverything2(){if(!this.lessonMusicStarted2){const m=document.getElementById('bgMusicLesson');m.volume=.15;m.play();this.lessonMusicStarted2=!0}},handleAction2(id){this.startEverything2();const idx=this.lessonStep2<4?this.lessonStep2:this.lessonStep2-1;if(id==='key'&&this.lessonStep2===4){document.getElementById('engineSnd').play();this.lessonStep2=5;return}if(id===this.lessonStep2){this.boxContent2[idx]=this.actions2[id].gif;document.getElementById('passSnd').play();this.lessonStep2++;if(this.lessonStep2===9){
+            confetti({particleCount: 200, spread: 100, origin: {y: 0.6}, colors:['#00FF00', '#0000FF', '#FF0000']});
+            this.gameWon2=!0; puzzle2Passed=true; document.getElementById('victorySnd').play();setTimeout(()=>{this.finishL1A();this.gameWon2=!1;},3000)}}else{this.triggerLessonFail2(idx)}},completeL1A(){if(!puzzle1Passed || !puzzle2Passed) return; levelData[0].passed = true; coursesPassedCount += 1; if(levelData[1]) { levelData[1].lock = false; playVideo(levelData[1].v); setTimeout(() => { scrollToLevel(1); }, 500); } renderCards(); updateGlobalProgress();},handleMapClick2(e){if(e.target.id==='mainMap2')this.triggerLessonFail2(this.lessonStep2<4?this.lessonStep2:this.lessonStep2-1)},triggerLessonFail2(idx){if(idx<8)this.errorInBox2[idx]=!0;document.getElementById('sndFail').play();const m=document.getElementById('map-container-2');m.classList.add('wrong-hit-2');setTimeout(()=>m.classList.remove('wrong-hit-2'),400);setTimeout(()=>{this.lessonStep2=0;this.boxContent2=Array(8).fill(null);this.errorInBox2=Array(8).fill(!1)},1400)},resetOnlyPhase2(){this.lessonStep2=0;this.boxContent2=Array(8).fill(null);this.errorInBox2=Array(8).fill(!1)}}}
+</script>
+</body>
+</html>
